@@ -1,4 +1,4 @@
-(ns reboot.core
+(ns ^:figwheel-hooks reboot.core
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
@@ -19,19 +19,6 @@
   (reagent.dom/render [reboot.views/xert-app]
                       (.getElementById js/document "app")))
 
-(defn ^:export ^:after-load main
+(defn ^:after-load main
   []
-  (prn "main")
   (render))
-
-;; (defn ^:export login [username password]
-;;   (go (let [res (<! (http/post "https://www.xertonline.com/oauth/token"
-;;                                {;; :with-credentials? true
-;;                                 :basic-auth {:username "xert_public" :password "xert_public"}
-;;                                 ;; :with-credentials? false
-;;                                 :form-params {:grant_type "password"
-;;                                               :username username
-;;                                               :password password}}))]
-;;         (prn (:status res))
-;;         (prn (:body res)))))
-

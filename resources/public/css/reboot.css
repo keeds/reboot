@@ -1,0 +1,9 @@
+<style>
+.flex {
+    display: flex;
+}
+.flex > div {
+    font-size: 12px;
+    padding: 2px;
+}
+</style>

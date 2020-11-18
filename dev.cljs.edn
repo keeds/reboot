@@ -1,1 +1,2 @@
+^{:watch-dirs ["src"]}
 {:main reboot.core}

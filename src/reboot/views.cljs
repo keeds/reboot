@@ -16,7 +16,7 @@
   (let [gettext (fn [e] (-> e .-target .-value))
         emit    (fn [e] (rf/dispatch [:password-change (gettext e)]))]
     [:div
-     [:input {:type      "text"
+     [:input {:type      "password"
               :value     @(rf/subscribe [:password])
               :on-change emit}]]))
 
