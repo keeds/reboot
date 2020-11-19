@@ -22,3 +22,6 @@
 (defn ^:after-load main
   []
   (render))
+
+(defonce start-up
+  (do (main) true))

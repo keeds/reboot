@@ -1,65 +1,91 @@
 (ns reboot.views
   (:require
+   [reagent.core :as reagent]
    [re-frame.core :as rf :refer [dispatch]]))
 
-(defn user-input
+(defn login
   []
-  (let [gettext (fn [e] (-> e .-target .-value))
-        emit    (fn [e] (rf/dispatch [:user-change (gettext e)]))]
-    [:div
-     [:input {:type      "text"
-              :value     @(rf/subscribe [:username])
-              :on-change emit}]]))
-
-(defn password-input
-  []
-  (let [gettext (fn [e] (-> e .-target .-value))
-        emit    (fn [e] (rf/dispatch [:password-change (gettext e)]))]
-    [:div
-     [:input {:type      "password"
-              :value     @(rf/subscribe [:password])
-              :on-change emit}]]))
+  (let [default {:username "" :password ""}
+        credentials (reagent/atom default)]
+    (fn []
+      (let [{:keys [username password]} @credentials
+            login-user (fn [event credentials]
+                         (.preventDefault event)
+                         (rf/dispatch [:login credentials]))]
+        [:form {:class "pure-form"}
+         [:fieldset
+          [:legend "Login"]
+          [:input {:type "text"
+                   :placeholder "Username"
+                   :value username
+                   :on-change #(swap! credentials assoc :username (-> % .-target .-value))}]
+          [:input {:type "password"
+                   :placeholder "Password"
+                   :value password
+                   :on-change #(swap! credentials assoc :password (-> % .-target .-value))}]
+          [:button {:class "pure-button pure-button-primary"
+                    :on-click #(login-user % @credentials)} "Login"]]]))))
 
 (defn workouts
   []
   (let [workouts @(rf/subscribe [:workouts])]
-    [:div {:class "workout-list"} "Workouts"
-     (for [{:keys [_id name xss difficulty duration advisorScore]} workouts]
-       [:div ^{:key _id} {:class "flex workout"}
-        [:div {:class "name"} name]
-        [:div {:class "xss"} xss]
-        [:div {:class "difficulty"} difficulty]
-        [:div {:class "duration"} duration]
-        [:div {:class "advistorScore"} advisorScore]])]))
+    [:div
+     [:h4 "Workouts"]
+     [:table {:class "pure-table"}
+      [:thead
+       [:tr
+        [:td "Name"]
+        [:td "XSS"]
+        [:td "Difficulty"]
+        [:td "Duration"]
+        [:td "Advisor Score"]]]
+      [:tbody
+       (for [{:keys [_id name xss difficulty duration advisorScore]} workouts]
+         [:tr ^{:key _id}
+          [:td name]
+          [:td xss]
+          [:td (Math/round difficulty)]
+          [:td duration]
+          [:td (Math/round advisorScore)]])]]]))
 
 (defn activities
   []
   (let [activities @(rf/subscribe [:activities])]
-    [:div {:class "activities-list"} "Activities"
-     (for [{:keys [path name start_date description activity_type]} activities]
-       [:div ^{:key path} {:class "flex activity"}
-        [:div (-> start_date :date)]
-        [:div name]
-        [:div activity_type]])]))
+    [:div
+     [:h4 "Activities"]
+     [:table {:class "pure-table"}
+      [:thead
+       [:tr
+        [:td "Date"]
+        [:td "Name"]]]
+      [:tbody
+       (for [{:keys [path name start_date description activity_type]} activities]
+         [:tr ^{:key path}
+          [:td (-> start_date :date)]
+          [:td name]])]]]))
 
 (defn xert-app
   []
   (let [auth     @(rf/subscribe [:authentication])
         loading? @(rf/subscribe [:loading?])]
-    [:h1 "Xert"
-     [:div
-      [user-input]
-      [password-input]]
-     [:div (str "access-token: " (:access_token auth))]
-     [:div (str "refresh-token: "(:refresh_token auth))]
-     [:div
-      [:button {:on-click #(rf/dispatch [:login])} "Login"]
-      [:button {:on-click #(rf/dispatch [:get-user-workouts])} "Workouts"]
-      [:button {:on-click #(rf/dispatch [:get-activities])} "Activites"]
-      (if loading?
-        [:text "Loading..."])]
-     [:div
-      [:button {:on-click #(rf/dispatch [:clear-workouts])} "Clear Workouts"]
-      [:button {:on-click #(rf/dispatch [:clear-activities])} "Clear Activities"]]
-     [workouts]
-     [activities]]))
+    [:div {:id "layout" :class "pure-g"}
+     [:div {:class "pure-u-1"}
+      [login]
+      [:section
+       [:div (str "access-token: " (:access_token auth))]
+       [:div (str "refresh-token: "(:refresh_token auth))]]
+      [:section
+       [:button {:class "button-secondary pure-button"
+                 :on-click #(rf/dispatch [:get-user-workouts])} "Workouts"]
+       [:button {:class "button-secondary pure-button"
+                 :on-click #(rf/dispatch [:get-activities])} "Activites"]
+       (if loading?
+         [:p "Loading..."])]
+      [:section
+       [:button {:class "button-secondary pure-button"
+                 :on-click #(rf/dispatch [:clear-workouts])} "Clear Workouts"]
+       [:button {:class "button-secondary pure-button"
+                 :on-click #(rf/dispatch [:clear-activities])} "Clear Activities"]]
+      [:div {:class "content"}
+       [workouts]
+       [activities]]]]))

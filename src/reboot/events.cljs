@@ -22,7 +22,7 @@
 
 (reg-event-fx
  :login
- (fn [{db :db} _]
+ (fn [{db :db} [_ credentials]]
    {:http-xhrio {:method :post
                  :uri "https://www.xertonline.com/oauth/token"
                  :timeout 8000
@@ -30,8 +30,8 @@
                  :format (ajax/url-request-format)
                  :response-format (ajax/json-response-format {:keywords? true})
                  :params {:grant_type "password"
-                          :username (:username db)
-                          :password (:password db)}
+                          :username (:username credentials)
+                          :password (:password credentials)}
                  :on-success [:login-success]
                  :on-failure [:bad-response]}
     :db (assoc db :logged-in? false)}))

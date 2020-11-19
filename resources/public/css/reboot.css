@@ -1,9 +1,11 @@
-<style>
-.flex {
-    display: flex;
+body {
+    font-family: "Lucida Console, Courier, Monospace";
+    font-size: 14px;
 }
-.flex > div {
+
+table {
+    border-width: 1px;
+    border-color: black;
+    border-style: solid;
     font-size: 12px;
-    padding: 2px;
 }
-</style>
