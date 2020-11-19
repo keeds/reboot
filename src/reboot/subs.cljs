@@ -36,3 +36,8 @@
  :workout-sort
  (fn [db _]
    (:workout-sort db)))
+
+(rf/reg-sub
+ :activity-sort
+ (fn [db _]
+   (:activity-sort db)))

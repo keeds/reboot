@@ -38,7 +38,7 @@
      [:table {:class "pure-table"}
       [:thead
        [:tr
-        [:td {:on-click #(rf/dispatch [:workout-sort :name])}"Name"]
+        [:td {:on-click #(rf/dispatch [:workout-sort :name])} "Name"]
         [:td {:on-click #(rf/dispatch [:workout-sort :xss])} "XSS"]
         [:td {:on-click #(rf/dispatch [:workout-sort :difficulty])} "Difficulty"]
         [:td {:on-click #(rf/dispatch [:workout-sort :duration])} "Duration"]
@@ -54,16 +54,19 @@
 
 (defn activities
   []
-  (let [activities @(rf/subscribe [:activities])]
+  (let [{col :col order :order} @(rf/subscribe [:activity-sort])
+        sorted (cond->> @(rf/subscribe [:activities])
+                 col (sort-by col)
+                 order (reverse))]
     [:div
      [:h4 "Activities"]
      [:table {:class "pure-table"}
       [:thead
        [:tr
-        [:td "Date"]
-        [:td "Name"]]]
+        [:td {:on-click #(rf/dispatch [:activity-sort :date])} "Date"]
+        [:td {:on-click #(rf/dispatch [:activity-sort :name])} "Name"]]]
       [:tbody
-       (for [{:keys [path name start_date description activity_type]} activities]
+       (for [{:keys [path name start_date description activity_type]} sorted]
          [:tr ^{:key path}
           [:td (-> start_date :date)]
           [:td name]])]]]))

@@ -119,3 +119,11 @@
    (if (= col (:col workout-sort))
      (update-in db [:workout-sort :order] not)
      (assoc db :workout-sort {:col col :order false}))))
+
+;; Actvity sorting
+(reg-event-db
+ :activity-sort
+ (fn [{activity-sort :activity-sort :as db} [_ col]]
+   (if (= col (:col activity-sort))
+     (update-in db [:activity-sort :order] not)
+     (assoc db :activity-sort {:col col :order false}))))
