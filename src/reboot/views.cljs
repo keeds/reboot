@@ -28,19 +28,23 @@
 
 (defn workouts
   []
-  (let [workouts @(rf/subscribe [:workouts])]
+  (let [{col :col order :order :as workout-sort} @(rf/subscribe [:workout-sort])
+        sorted (cond->> @(rf/subscribe [:workouts])
+                 col (sort-by col)
+                 order (reverse))]
+    (prn "workout-sort: " workout-sort col order)
     [:div
      [:h4 "Workouts"]
      [:table {:class "pure-table"}
       [:thead
        [:tr
-        [:td "Name"]
-        [:td "XSS"]
-        [:td "Difficulty"]
-        [:td "Duration"]
-        [:td "Advisor Score"]]]
+        [:td {:on-click #(rf/dispatch [:workout-sort :name])}"Name"]
+        [:td {:on-click #(rf/dispatch [:workout-sort :xss])} "XSS"]
+        [:td {:on-click #(rf/dispatch [:workout-sort :difficulty])} "Difficulty"]
+        [:td {:on-click #(rf/dispatch [:workout-sort :duration])} "Duration"]
+        [:td {:on-click #(rf/dispatch [:workout-sort :advisorScore])} "Advisor Score"]]]
       [:tbody
-       (for [{:keys [_id name xss difficulty duration advisorScore]} workouts]
+       (for [{:keys [_id name xss difficulty duration advisorScore]} sorted]
          [:tr ^{:key _id}
           [:td name]
           [:td xss]

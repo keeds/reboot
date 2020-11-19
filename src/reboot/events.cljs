@@ -111,3 +111,11 @@
  (fn [db _]
    (assoc db :loading? false)))
 
+
+;; Workout sorting
+(reg-event-db
+ :workout-sort
+ (fn [{workout-sort :workout-sort :as db} [_ col]]
+   (if (= col (:col workout-sort))
+     (update-in db [:workout-sort :order] not)
+     (assoc db :workout-sort {:col col :order false}))))

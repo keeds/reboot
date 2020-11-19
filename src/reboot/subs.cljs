@@ -31,3 +31,8 @@
  :workouts
  (fn [db _]
    (-> db :user-workouts :workouts)))
+
+(rf/reg-sub
+ :workout-sort
+ (fn [db _]
+   (:workout-sort db)))
