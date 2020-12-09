@@ -42,6 +42,30 @@
    (assoc db :authentication response)))
 
 (reg-event-fx
+ :activity
+ (fn [{db :db} [_ path]]
+   (prn "Activity: " path)
+   {:http-xhrio {:method :get
+                 :uri (str "https://www.xertonline.com/oauth/activity/" path)
+                 :timeout 8000
+                 :headers {:authorization (str "Bearer " (-> db :authentication :access_token))}
+                 :params {:include_session_data 0}
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [:activity-success path]
+                 :on-failure [:bad-response]}
+    :db (assoc db :loading? true db)}))
+
+(reg-event-db
+ :activity-success
+ (fn [db [_ path response]]
+   (let [data (-> response
+                  (dissoc :success)
+                  (assoc :path path))]
+     (-> db
+         (assoc :loading? false)
+         (update :activity assoc path data)))))
+
+(reg-event-fx
  :get-activities
  (fn [{db :db} _]
    (let [d1   (new date/Date)
@@ -65,7 +89,7 @@
  (fn [db [_ response]]
    (assoc db
           :loading? false
-          :activities response)))
+          :activities (:activities response))))
 
 (reg-event-db
  :clear-activities

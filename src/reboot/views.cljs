@@ -26,6 +26,13 @@
           [:button {:class "pure-button pure-button-primary"
                     :on-click #(login-user % @credentials)} "Login"]]]))))
 
+(defn activity-details
+  []
+  (let [activities @(rf/subscribe [:activity-details])]
+    (prn activities)
+    [:div
+     (count activities)]))
+
 (defn workouts
   []
   (let [{col :col order :order :as workout-sort} @(rf/subscribe [:workout-sort])
@@ -35,41 +42,57 @@
     (prn "workout-sort: " workout-sort col order)
     [:div
      [:h4 "Workouts"]
-     [:table {:class "pure-table"}
+     [:table {:class "pure-table pure-table-bordered"}
       [:thead
        [:tr
         [:td {:on-click #(rf/dispatch [:workout-sort :name])} "Name"]
         [:td {:on-click #(rf/dispatch [:workout-sort :xss])} "XSS"]
         [:td {:on-click #(rf/dispatch [:workout-sort :difficulty])} "Difficulty"]
         [:td {:on-click #(rf/dispatch [:workout-sort :duration])} "Duration"]
-        [:td {:on-click #(rf/dispatch [:workout-sort :advisorScore])} "Advisor Score"]]]
+        [:td {:on-click #(rf/dispatch [:workout-sort :advisorScore])} "Advisor Score"]
+        [:td]]]
       [:tbody
-       (for [{:keys [_id name xss difficulty duration advisorScore]} sorted]
-         [:tr ^{:key _id}
-          [:td name]
-          [:td xss]
-          [:td (Math/round difficulty)]
-          [:td duration]
-          [:td (Math/round advisorScore)]])]]]))
+       (for [{:keys [_id name xss difficulty duration advisorScore thumb]} sorted]
+         ^{:key _id} [:tr
+                      [:td name]
+                      [:td xss]
+                      [:td (Math/round difficulty)]
+                      [:td duration]
+                      [:td (Math/round advisorScore)]
+                      [:td [:img {:src thumb
+                                  :class "workout-thumb"}]]])]]]))
 
 (defn activities
   []
   (let [{col :col order :order} @(rf/subscribe [:activity-sort])
         sorted (cond->> @(rf/subscribe [:activities])
                  col (sort-by col)
-                 order (reverse))]
+                 order (reverse))
+        details @(rf/subscribe [:activity-details])]
+    (prn details)
     [:div
      [:h4 "Activities"]
-     [:table {:class "pure-table"}
+     [:table {:class "pure-table pure-table-bordered"}
       [:thead
        [:tr
+        [:td]
         [:td {:on-click #(rf/dispatch [:activity-sort :date])} "Date"]
-        [:td {:on-click #(rf/dispatch [:activity-sort :name])} "Name"]]]
+        [:td {:on-click #(rf/dispatch [:activity-sort :name])} "Name"]
+        [:td "xss"]
+        [:td "xep"]
+        [:td "diff"]
+        [:td "fresh"]]]
       [:tbody
-       (for [{:keys [path name start_date description activity_type]} sorted]
-         [:tr ^{:key path}
-          [:td (-> start_date :date)]
-          [:td name]])]]]))
+       (for [{:keys [path name start_date xss xep difficulty freshness]} sorted]
+         (let [{:keys [xss xep difficulty freshness]} (:summary (get details path))]
+           ^{:key path} [:tr
+                         [:td {:on-click #(rf/dispatch [:activity path])} "#"]
+                         [:td (-> start_date :date)]
+                         [:td name]
+                         [:td (Math/round xss)]
+                         [:td (Math/round xep)]
+                         [:td (Math/round difficulty)]
+                         [:td freshness]]))]]]))
 
 (defn xert-app
   []
@@ -94,5 +117,6 @@
        [:button {:class "button-secondary pure-button"
                  :on-click #(rf/dispatch [:clear-activities])} "Clear Activities"]]
       [:div {:class "content"}
+       [activity-details]
        [workouts]
        [activities]]]]))

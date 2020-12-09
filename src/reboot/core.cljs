@@ -21,6 +21,7 @@
 
 (defn ^:after-load main
   []
+  (rf/clear-subscription-cache!)
   (render))
 
 (defonce start-up

@@ -1,5 +1,7 @@
 (ns reboot.subs
   (:require
+   [clojure.set :as s]
+   [clojure.core.reducers :as r]
    [re-frame.core :as rf]))
 
 (rf/reg-sub
@@ -25,7 +27,7 @@
 (rf/reg-sub
  :activities
  (fn [db _]
-   (-> db :activities :activities)))
+   (-> db :activities)))
 
 (rf/reg-sub
  :workouts
@@ -41,3 +43,11 @@
  :activity-sort
  (fn [db _]
    (:activity-sort db)))
+
+(rf/reg-sub
+ :activity-details
+ (fn [db _]
+   ;; (let [as (:activities db)
+   ;;       ads (vals (:activity db))]
+   ;;   (s/join ads as {:path :path}))
+   (:activity db)))

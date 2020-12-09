@@ -3,4 +3,5 @@
 
 (def default-db {:auth {}
                  :workouts {}
-                 :activities {}})
+                 :activities {}
+                 :activity []})

@@ -1,11 +1,15 @@
-body {
-    font-family: "Lucida Console, Courier, Monospace";
-    font-size: 14px;
-}
+/* body { */
+/*     font-family: "Lucida Console, Courier, Monospace"; */
+/*     font-size: 14px; */
+/* } */
 
-table {
-    border-width: 1px;
-    border-color: black;
-    border-style: solid;
-    font-size: 12px;
+/* table { */
+/*     border-width: 1px; */
+/*     border-color: black; */
+/*     border-style: solid; */
+/*     font-size: 12px; */
+/* } */
+
+img.workout-thumb {
+    width: 100px;
 }
