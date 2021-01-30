@@ -41,6 +41,11 @@
  (fn [db [_ response]]
    (assoc db :authentication response)))
 
+(reg-event-db
+ :logout
+ (fn [db _]
+   (assoc db :authentication nil)))
+
 (reg-event-fx
  :activity
  (fn [{db :db} [_ path]]
