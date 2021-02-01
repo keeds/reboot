@@ -10,6 +10,10 @@
 /*     font-size: 12px; */
 /* } */
 
+div.full-page {
+    height: 200px;
+}
+
 img.workout-thumb {
     width: 100px;
 }

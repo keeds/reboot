@@ -12,32 +12,33 @@
             login-user (fn [event credentials]
                          (.preventDefault event)
                          (rf/dispatch [:login credentials]))]
-        [:form {:class "pure-form"}
-         [:fieldset
-          ;; [:legend "Login"]
-          [:input {:type "text"
-                   :placeholder "Username"
-                   :value username
-                   :on-change #(swap! credentials assoc :username (-> % .-target .-value))}]
-          [:input {:type "password"
-                   :placeholder "Password"
-                   :value password
-                   :on-change #(swap! credentials assoc :password (-> % .-target .-value))}]
-          [:button {:class "pure-button pure-button-primary"
-                    :on-click #(login-user % @credentials)} "Login"]]]))))
+        [:div {:class "d-flex align-items-center min-vh-100"}
+         [:div {:class "container"}
+          [:form {:class "pure-form"}
+           [:div {:class "row"}
+            [:div {:class "col"}
+             [:input {:type "text"
+                      :class "form-control"
+                      :placeholder "Username"
+                      :value username
+                      :on-change #(swap! credentials assoc :username (-> % .-target .-value))}]]
+            [:div {:class "col"}
+             [:input {:type "password"
+                      :class "form-control"
+                      :placeholder "Password"
+                      :value password
+                      :on-change #(swap! credentials assoc :password (-> % .-target .-value))}]]
+            [:div {:class "col"}
+             [:button {:type "button"
+                       :class "btn btn-primary"
+                       :on-click #(login-user % @credentials)} "Login"]]]]]]))))
 
 (defn logout
   []
   [:p
-   [:button {:class "pure-button pure-button-primary"
+   [:button {:type "button"
+             :class "btn btn-primary"
              :on-click #(rf/dispatch [:logout])} "Logout"]])
-
-(defn activity-details
-  []
-  (let [activities @(rf/subscribe [:activity-details])]
-    (prn activities)
-    [:div
-     (count activities)]))
 
 (defn workouts
   []
@@ -76,14 +77,12 @@
                  col (sort-by col)
                  order (reverse))
         details @(rf/subscribe [:activity-details])]
-    ;; (prn details)
     (when (seq sorted)
       [:div
        [:h4 "Activities"]
        [:table {:class "pure-table pure-table-bordered"}
         [:thead
          [:tr
-          [:td]
           [:td {:on-click #(rf/dispatch [:activity-sort :date])} "Date"]
           [:td {:on-click #(rf/dispatch [:activity-sort :name])} "Name"]
           [:td "xss"]
@@ -93,8 +92,7 @@
         [:tbody
          (for [{:keys [path name start_date xss xep difficulty freshness]} sorted]
            (let [{:keys [xss xep difficulty freshness]} (:summary (get details path))]
-             ^{:key path} [:tr
-                           [:td {:on-click #(rf/dispatch [:activity path])} "#"]
+             ^{:key path} [:tr {:on-click #(rf/dispatch [:activity path])}
                            [:td (-> start_date :date)]
                            [:td name]
                            [:td (Math/round xss)]
@@ -106,10 +104,21 @@
   []
   (let [auth     @(rf/subscribe [:authentication])
         loading? @(rf/subscribe [:loading?])]
-    [:div {:id "layout" :class "pure-g"}
-     [:div {:class "pure-u-1"}
-      (if-not (:access_token auth)
-        [login]
+    ;; [:div {:id "layout" :class "pure-g"}
+    ;;  [:div {:class "pure-u-1"}]]
+    [:div {:class "container"}
+     (if-not (:access_token auth)
+       [login]
+       [:div
+        [:nav {:class "navbar navbar-expand-lg navbar-light bg-light"}
+         [:div {:class "container-fluid"}
+          [:ul {:class "navbar-nav"}
+           [:li {:class "nav-item"}
+            [:a.navbar-text.nav-link "Workouts"]]
+           [:li.nav-item
+            [:a.navbar-text.nav-link "Activities"]]
+           [:li {:class "nav-item"}
+            [logout]]]]]
         [:p
          [:section
           [logout]
@@ -117,15 +126,15 @@
            [:button {:class "pure-button-primary pure-button"
                      :on-click #(rf/dispatch [:get-user-workouts])} "Fetch Workouts"]
            [:button {:class "pure-button-primary pure-button"
-                     :on-click #(rf/dispatch [:get-activities])} "Fetch Activites"]
-           (if loading?
-             [:div "Loading..."])]]
+                     :on-click #(rf/dispatch [:get-activities])} "Fetch Activites"]]]
          [:section
           [:button {:class "pure-button-secondary pure-button"
                     :on-click #(rf/dispatch [:clear-workouts])} "Clear Workouts"]
           [:button {:class "pure-button-warning pure-button"
                     :on-click #(rf/dispatch [:clear-activities])} "Clear Activities"]]
          [:div {:class "content"}
-          ;; [activity-details]
           [workouts]
-          [activities]]])]]))
+          [activities]]
+         (if loading?
+           [:div {:class "fixed-bottom"}
+            [:span {:class "badge bg-secondary"} "Loading..."]])]])]))
