@@ -73,7 +73,7 @@
 (reg-event-fx
  :get-activities
  (fn [{db :db} _]
-   (let [d1   (new date/Date)
+   (let [d1   (new date/DateTime)
          d2   (.clone d1)
          i    (new date/Interval Interval.YEARS 1)
          _    (.add d2 (.getInverse i))

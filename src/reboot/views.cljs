@@ -50,7 +50,7 @@
     (when (seq sorted)
       [:div
        [:h4 "Workouts"]
-       [:table {:class "pure-table pure-table-bordered"}
+       [:table {:class "table"}
         [:thead
          [:tr
           [:td {:on-click #(rf/dispatch [:workout-sort :name])} "Name"]
@@ -62,7 +62,7 @@
         [:tbody
          (for [{:keys [_id name xss difficulty duration advisorScore thumb]} sorted]
            ^{:key _id} [:tr
-                        [:td name]
+                        [:th {:scope name} name]
                         [:td xss]
                         [:td (Math/round difficulty)]
                         [:td duration]
@@ -80,7 +80,7 @@
     (when (seq sorted)
       [:div
        [:h4 "Activities"]
-       [:table {:class "pure-table pure-table-bordered"}
+       [:table {:class "table"}
         [:thead
          [:tr
           [:td {:on-click #(rf/dispatch [:activity-sort :date])} "Date"]
@@ -93,8 +93,8 @@
          (for [{:keys [path name start_date xss xep difficulty freshness]} sorted]
            (let [{:keys [xss xep difficulty freshness]} (:summary (get details path))]
              ^{:key path} [:tr {:on-click #(rf/dispatch [:activity path])}
-                           [:td (-> start_date :date)]
-                           [:td name]
+                           [:td (-> start_date :date js/Date. (.toLocaleString "en-GB"))]
+                           [:th {:scope name} name]
                            [:td (Math/round xss)]
                            [:td (Math/round xep)]
                            [:td (Math/round difficulty)]
@@ -104,8 +104,6 @@
   []
   (let [auth     @(rf/subscribe [:authentication])
         loading? @(rf/subscribe [:loading?])]
-    ;; [:div {:id "layout" :class "pure-g"}
-    ;;  [:div {:class "pure-u-1"}]]
     [:div {:class "container"}
      (if-not (:access_token auth)
        [login]
@@ -119,18 +117,18 @@
             [:a.navbar-text.nav-link "Activities"]]
            [:li {:class "nav-item"}
             [logout]]]]]
-        [:p
+        [:div
          [:section
           [logout]
           [:div
-           [:button {:class "pure-button-primary pure-button"
+           [:button {:class "btn btn-primary"
                      :on-click #(rf/dispatch [:get-user-workouts])} "Fetch Workouts"]
-           [:button {:class "pure-button-primary pure-button"
+           [:button {:class "btn btn-primary"
                      :on-click #(rf/dispatch [:get-activities])} "Fetch Activites"]]]
          [:section
-          [:button {:class "pure-button-secondary pure-button"
+          [:button {:class "btn btn-secondary"
                     :on-click #(rf/dispatch [:clear-workouts])} "Clear Workouts"]
-          [:button {:class "pure-button-warning pure-button"
+          [:button {:class "btn btn-secondary"
                     :on-click #(rf/dispatch [:clear-activities])} "Clear Activities"]]
          [:div {:class "content"}
           [workouts]
