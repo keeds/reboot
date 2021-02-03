@@ -25,6 +25,11 @@
    (:loading? db)))
 
 (rf/reg-sub
+ :current-tab
+ (fn [db _]
+   (get db :current-tab :workouts)))
+
+(rf/reg-sub
  :activities
  (fn [db _]
    (-> db :activities)))
@@ -47,7 +52,4 @@
 (rf/reg-sub
  :activity-details
  (fn [db _]
-   ;; (let [as (:activities db)
-   ;;       ads (vals (:activity db))]
-   ;;   (s/join ads as {:path :path}))
    (:activity db)))

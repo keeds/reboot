@@ -46,6 +46,11 @@
  (fn [db _]
    (assoc db :authentication nil)))
 
+(reg-event-db
+ :set-current-tab
+ (fn [db [_ tab]]
+   (assoc db :current-tab tab)))
+
 (reg-event-fx
  :activity
  (fn [{db :db} [_ path]]
