@@ -91,8 +91,10 @@
         [:section
          [:button {:class "btn btn-secondary"
                    :on-click #(rf/dispatch [:get-activities])} "Fetch"]
-         [:button {:class "btn btn-secondary"
+         [:button {:class "btn btn-warning"
                    :on-click #(rf/dispatch [:clear-activities])} "Clear"]
+         [:button {:class "btn btn-info"
+                   :on-click #(rf/dispatch [:fetch-all-activity-details])} "Details"]
          (when (seq sorted)
            [:div
             [:h4 "Activities"]
@@ -129,7 +131,7 @@
 
 (defn header
   []
-  (let [tab @(rf/subscribe [:current-tab])
+  (let [tab (rf/subscribe [:current-tab])
         set-tab (fn [e new-tab]
                   (.preventDefault e)
                   (rf/dispatch [:set-current-tab new-tab]))]
@@ -139,11 +141,13 @@
         [:div {:class "container-fluid"}
          [:ul {:class "nav nav-tabs"}
           [:li {:class "nav-item"}
-           [:a.navbar-text.nav-link {:href "#"
-                                     :on-click #(set-tab % :workouts)} "Workouts"]]
+           [:a.nav-link {:class (when (= :workouts @tab) "active")
+                         :href "#"
+                         :on-click #(set-tab % :workouts)} "Workouts"]]
           [:li.nav-item
-           [:a.navbar-text.nav-link {:href "#"
-                                     :on-click #(set-tab % :activities)} "Activities"]]]
+           [:a.nav-link {:class (when (= :activities @tab) "active")
+                         :href "#"
+                         :on-click #(set-tab % :activities)} "Activities"]]]
          [:div
           [logout]]]]])))
 

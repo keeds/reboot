@@ -1,6 +1,7 @@
 (ns reboot.events
   (:require
    [ajax.core :as ajax]
+   [clojure.set :as set]
    [day8.re-frame.http-fx]
    [goog.crypt.base64 :as base64]
    [goog.date :as date]
@@ -54,7 +55,6 @@
 (reg-event-fx
  :activity
  (fn [{db :db} [_ path]]
-   (prn "Activity: " path)
    {:http-xhrio {:method :get
                  :uri (str "https://www.xertonline.com/oauth/activity/" path)
                  :timeout 8000
@@ -73,14 +73,32 @@
                   (assoc :path path))]
      (-> db
          (assoc :loading? false)
-         (update :activity assoc path data)))))
+         (assoc-in [:activity path] data)))))
+
+;; fetch-all-activity-details
+;; - all activity paths
+;; - first, check not existing
+;; - fetch path details
+;; - update details and remove from list
+;; - repeat
+
+(reg-event-fx
+ :fetch-all-activity-details
+ (fn [{db :db} _]
+   (let [all-paths (set (map :path (:activities db)))
+         paths (set (keys (:activity db)))
+         fetch-paths (set/difference all-paths paths)]
+     (if (seq fetch-paths)
+       {:fx [[:dispatch [:activity (first fetch-paths)]]]
+        :db db}
+       {:db db}))))
 
 (reg-event-fx
  :get-activities
  (fn [{db :db} _]
    (let [d1   (new date/DateTime)
          d2   (.clone d1)
-         i    (new date/Interval Interval.YEARS 1)
+         i    (new date/Interval Interval.MONTHS 3)
          _    (.add d2 (.getInverse i))
          to   (/ (.valueOf d1) 1000)
          from (/ (.valueOf d2) 1000)]
