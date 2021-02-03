@@ -5,6 +5,9 @@ A small personal project to "reboot" my Clojure(Script) foo after a short break 
 Provides a ClojureScript UI using re-frame to Xerts API
 Xert is a (mainly) Cycling training platform to manage fitness and training using Power data from appropriate sources. There is an extensive existing UI for the service (which does not use this API), but this project is just to play with the available API.
 
+https://www.xertonline.com/
+https://www.xertonline.com/API.html
+
 This is a ClojureScript only project and as such there are issues with CORS. The Xert API is not configured for any origin so I have had to use a Chrome plugin to fudge the CORS restrictions. It's been a while since I've tackled CORS so I may be barking up the wrong tree.
 
 CORS plugin used is: Moesif CORS
