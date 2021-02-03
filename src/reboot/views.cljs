@@ -110,7 +110,7 @@
              [:tbody
               (for [{:keys [path name start_date xss xep difficulty freshness]} sorted]
                 (let [{:keys [xss xep difficulty freshness]} (:summary (get details path))]
-                  ^{:key path} [:tr {:on-click #(rf/dispatch [:activity path])}
+                  ^{:key path} [:tr
                                 [:td (-> start_date :date js/Date. (.toLocaleString "en-GB"))]
                                 [:th {:scope name} name]
                                 [:td (Math/round xss)]

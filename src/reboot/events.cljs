@@ -75,13 +75,6 @@
          (assoc :loading? false)
          (assoc-in [:activity path] data)))))
 
-;; fetch-all-activity-details
-;; - all activity paths
-;; - first, check not existing
-;; - fetch path details
-;; - update details and remove from list
-;; - repeat
-
 (reg-event-fx
  :fetch-all-activity-details
  (fn [{db :db} _]
@@ -89,16 +82,42 @@
          paths (set (keys (:activity db)))
          fetch-paths (set/difference all-paths paths)]
      (if (seq fetch-paths)
-       {:fx [[:dispatch [:activity (first fetch-paths)]]]
+       {:fx [[:dispatch [:fetch-all-activity (first fetch-paths) (rest fetch-paths)]]]
         :db db}
        {:db db}))))
+
+(reg-event-fx
+ :fetch-all-activity
+ (fn [{db :db} [_ path paths]]
+   {:http-xhrio {:method :get
+                 :uri (str "https://www.xertonline.com/oauth/activity/" path)
+                 :timeout 8000
+                 :headers {:authorization (str "Bearer " (-> db :authentication :access_token))}
+                 :params {:include_session_data 0}
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [:fetch-all-activity-success path paths]
+                 :on-failure [:bad-response]}
+    :db (assoc db :loading? true db)}))
+
+(reg-event-fx
+ :fetch-all-activity-success
+ (fn [{db :db} [_ path paths response]]
+   (let [data (-> response
+                  (dissoc :success)
+                  (assoc :path path))
+         fx {:db (-> db
+                     (assoc :loading? false)
+                     (assoc-in [:activity path] data))}]
+     (if (first paths)
+       (assoc fx :fx [[:dispatch [:fetch-all-activity (first paths) (rest paths)]]])
+       fx))))
 
 (reg-event-fx
  :get-activities
  (fn [{db :db} _]
    (let [d1   (new date/DateTime)
          d2   (.clone d1)
-         i    (new date/Interval Interval.MONTHS 3)
+         i    (new date/Interval Interval.MONTHS 6)
          _    (.add d2 (.getInverse i))
          to   (/ (.valueOf d1) 1000)
          from (/ (.valueOf d2) 1000)]
@@ -122,7 +141,7 @@
 (reg-event-db
  :clear-activities
  (fn [db _]
-   (dissoc db :activities)))
+   (dissoc db :activities :activity)))
 
 (reg-event-fx
  :get-user-workouts
