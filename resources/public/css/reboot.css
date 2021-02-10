@@ -17,3 +17,8 @@ div.full-page {
 img.workout-thumb {
     width: 100px;
 }
+
+line.data-line {
+    stroke: #6666FF;
+    stoke-width: 3;
+}

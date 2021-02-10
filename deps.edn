@@ -1,9 +1,9 @@
-{:deps {cljs-http {:mvn/version "0.1.46"}
-        re-frame {:mvn/version "1.1.2"}
+{:deps {cljs-http/cljs-http {:mvn/version "0.1.46"}
+        re-frame/re-frame {:mvn/version "1.1.2"}
         day8.re-frame/http-fx {:mvn/version "0.2.1"}
-        binaryage/devtools {:mvn/version "1.0.2"}
+        cljsjs/c3 {:mvn/version "0.6.8-0"}
         com.bhauman/figwheel-main {:mvn/version "0.2.12"}
         com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-        }
+        binaryage/devtools {:mvn/version "1.0.2"}}
  :paths ["src" "target" "resources"]
  :aliases {:build-dev {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}

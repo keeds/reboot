@@ -1,7 +1,12 @@
 (ns reboot.views
   (:require
    [reagent.core :as reagent]
-   [re-frame.core :as rf :refer [dispatch]]))
+   [re-frame.core :as rf :refer [dispatch]]
+   [reboot.charts :as charts]))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Login
 
 (defn login
   []
@@ -40,6 +45,10 @@
              :class "btn btn-primary"
              :on-click #(rf/dispatch [:logout])} "Logout"]])
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Workouts
+
 (defn workouts
   []
   (let [workout-sort (rf/subscribe [:workout-sort])
@@ -77,6 +86,10 @@
                              [:td [:img {:src thumb
                                          :class "workout-thumb"}]]])]]])]))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Activities
+
 (defn activities
   []
   (let [activity-sort (rf/subscribe [:activity-sort])
@@ -106,17 +119,51 @@
                [:td "xss"]
                [:td "xep"]
                [:td "diff"]
-               [:td "fresh"]]]
+               [:td "fresh"]
+               [:td ""]]]
              [:tbody
               (for [{:keys [path name start_date xss xep difficulty freshness]} sorted]
-                (let [{:keys [xss xep difficulty freshness]} (:summary (get details path))]
+                (let [{:keys [xss xep difficulty freshness chart_view]} (:summary (get details path))]
                   ^{:key path} [:tr
                                 [:td (-> start_date :date js/Date. (.toLocaleString "en-GB"))]
                                 [:th {:scope name} name]
                                 [:td (Math/round xss)]
                                 [:td (Math/round xep)]
                                 [:td (Math/round difficulty)]
-                                [:td freshness]]))]]])]))))
+                                [:td freshness]
+                                [:td [:img {:src chart_view
+                                            :class "workout-thumb"}]]]))]]])]))))
+
+(defn data
+  [activity-data]
+  (let [dates-fn #(-> % second :summary :start_date :date)
+        data-fn #(-> % second :summary :session ((juxt :avg_power :max_power :avg_heart_rate :max_heart_rate)))
+        data (map
+              (juxt dates-fn data-fn)
+              activity-data)]
+    (map #(hash-map (first %) (zipmap [:avg-power :max-power :avg-hr :max-power] (second %)))
+         data)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Charts
+
+(defn charts
+  []
+  (let [activity-data (rf/subscribe [:activity-details])
+        data (data @activity-data)]
+    (prn data)
+    [:div
+     [:h2 "Charts"]
+     [:button {:class "btn btn-secondary"
+               :on-click #(charts/build data)} "Chart"]
+     [:div#chart]
+     [:div
+      [:p (count @activity-data)]]]))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Base
 
 (defn blank
   []
@@ -127,6 +174,7 @@
   (case tab
     :workouts [workouts]
     :activities [activities]
+    :charts [charts]
     [blank]))
 
 (defn header
@@ -147,9 +195,13 @@
           [:li.nav-item
            [:a.nav-link {:class (when (= :activities @tab) "active")
                          :href "#"
-                         :on-click #(set-tab % :activities)} "Activities"]]]
-         [:div
-          [logout]]]]])))
+                         :on-click #(set-tab % :activities)} "Activities"]]
+          [:li.nav-item
+           [:a.nav-link {:class (when (= :charts @tab) "active")
+                         :href "#"
+                         :on-click #(set-tab % :charts)} "Charts"]]]]
+        [:div
+         [logout]]]])))
 
 (defn footer
   []
@@ -169,3 +221,23 @@
        [header]
        [tabs tab]
        [footer]])))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; REPL
+
+(comment
+
+  (-> @(rf/subscribe [:activity-details])
+      first
+      second
+      keys)
+
+  (-> @(rf/subscribe [:activity-details])
+      first
+      second
+      :summary
+      ;; :chart_view
+      )
+  
+  )
