@@ -228,16 +228,23 @@
 
 (comment
 
-  (-> @(rf/subscribe [:activity-details])
-      first
-      second
-      keys)
+  (->> @(rf/subscribe [:activity-details])
+       (map (comp keys :summary second)))
 
-  (-> @(rf/subscribe [:activity-details])
-      first
-      second
-      :summary
-      ;; :chart_view
-      )
+  (->> @(rf/subscribe [:activity-details])
+       (map (comp :total_grams_carbs :summary second)))
+
+  (let [ks [:total_grams_carbs :total_grams_fat]
+        data @(rf/subscribe [:activity-details])]
+    (->> data
+         (map (comp :summary second))
+         (map (apply juxt ks))
+         (map #(zipmap ks %))))
+  
+  (let [ks [:xss :total_grams_carbs :total_grams_fat]
+        data @(rf/subscribe [:activity-details])]
+    (->> data
+         (map (comp #(select-keys % ks) :summary second))
+         (apply (partial merge-with +))))
   
   )
